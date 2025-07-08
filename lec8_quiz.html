@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INF2003 Lecture 8 Quiz: Data Warehouse & OLAP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .quiz-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quiz-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #1e3c72, #2a5298);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .progress-container {
+            margin-bottom: 30px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1e3c72, #2a5298);
+            transition: width 0.3s ease;
+            border-radius: 5px;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-number {
+            color: #1e3c72;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        .question-text {
+            font-size: 1.4em;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #495057;
+            overflow-x: auto;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 18px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            font-size: 1.1em;
+        }
+
+        .option:hover {
+            border-color: #1e3c72;
+            background: #e6f3ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.1);
+        }
+
+        .option.selected {
+            border-color: #1e3c72;
+            background: #e6f3ff;
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.2);
+        }
+
+        .option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .option.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .option-code {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            background: #f1f3f4;
+            padding: 8px 12px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 35px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(30, 60, 114, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .score-display {
+            text-align: center;
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .explanation {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            margin-top: 25px;
+            border-radius: 0 8px 8px 0;
+            text-align: left;
+        }
+
+        .explanation h4 {
+            color: #1976d2;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .explanation p {
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .start-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .start-screen h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 2.2em;
+        }
+
+        .start-screen p {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 35px;
+            line-height: 1.6;
+        }
+
+        .quiz-info {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 35px;
+            text-align: left;
+        }
+
+        .quiz-info h3 {
+            color: #1e3c72;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+        }
+
+        .quiz-info ul {
+            color: #555;
+            line-height: 2;
+            font-size: 1.1em;
+        }
+
+        .results {
+            text-align: center;
+            padding: 40px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .results h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 2.2em;
+        }
+
+        .score {
+            font-size: 3.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .score.excellent { color: #28a745; }
+        .score.good { color: #17a2b8; }
+        .score.average { color: #ffc107; }
+        .score.poor { color: #dc3545; }
+
+        .performance-message {
+            font-size: 1.3em;
+            margin-bottom: 30px;
+            color: #555;
+        }
+
+        @media (max-width: 768px) {
+            .quiz-container {
+                padding: 25px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .question-text {
+                font-size: 1.2em;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="header">
+            <h1>Lecture 2 Quiz</h1>
+            <p>Lecture 2: SQL Basics & Data Manipulation - AY24/25 T3</p>
+        </div>
+
+        <div id="start-screen" class="start-screen">
+            <h2>Welcome to the SQL Fundamentals Quiz!</h2>
+            <p>Test your knowledge on SQL basics, data types, DDL, DML, and query operations.</p>
+            
+            <div class="quiz-info">
+                <h3>📚 Quiz Coverage:</h3>
+                <ul>
+                    <li>🔧 <strong>SQL Basics:</strong> Syntax, comments, case sensitivity</li>
+                    <li>🏗️ <strong>DDL Commands:</strong> CREATE, ALTER, DROP statements</li>
+                    <li>📊 <strong>Data Types:</strong> CHAR, VARCHAR, INT, NUMERIC, DATE</li>
+                    <li>📝 <strong>DML Operations:</strong> INSERT, SELECT, WHERE clauses</li>
+                    <li>🔍 <strong>Query Operations:</strong> Multiple tables, joins, pattern matching</li>
+                    <li>🎯 <strong>String Operations:</strong> LIKE operator, wildcards</li>
+                </ul>
+            </div>
+
+            <div class="quiz-info">
+                <h3>🎯 Quiz Details:</h3>
+                <ul>
+                    <li>📊 <strong>22 Questions</strong> covering all lecture topics</li>
+                    <li>🎯 <strong>Multiple Choice</strong> with code examples</li>
+                    <li>⏱️ <strong>Self-paced</strong> - no time pressure</li>
+                    <li>📝 <strong>Detailed explanations</strong> for each answer</li>
+                    <li>🏆 <strong>Instant feedback</strong> and final score</li>
+                </ul>
+            </div>
+            
+            <button class="btn btn-primary" onclick="startQuiz()">Start SQL Quiz</button>
+        </div>
+
+        <div id="quiz-screen" style="display: none;">
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="progress-text">Question 1 of 28</span>
+                </div>
+            </div>
+            
+            <div class="score-display">
+                <span>Current Score: <span id="score">0</span> / <span id="total">28</span></span>
+            </div>
+
+            <div class="question-container">
+                <div class="question-number" id="question-number">Question 1 of 28</div>
+                <div class="question-text" id="question-text"></div>
+                <div class="options" id="options"></div>
+                <div class="explanation" id="explanation" style="display: none;"></div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-secondary" id="prev-btn" onclick="prevQuestion()" disabled>Previous</button>
+                <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()" disabled>Next Question</button>
+            </div>
+        </div>
+
+        <div id="results-screen" style="display: none;">
+            <div class="results">
+                <h2>🎉 Quiz Complete!</h2>
+                <div class="score" id="final-score">0/22</div>
+                <div class="performance-message" id="performance-message"></div>
+                <button class="btn btn-primary" onclick="restartQuiz()">Restart Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+const questions = [
+    {
+        question: "What is a data warehouse?",
+        options: [
+            "A system for real-time transaction processing",
+            "A system managing and storing data from multiple sources for analysis",
+            "A type of NoSQL database",
+            "An in-memory cache for web apps"
+        ],
+        correct: 1,
+        explanation: "Correct answer: A system managing and storing data from multiple sources for analysis. Data warehouses support BI and reporting over historical data."
+    },
+    {
+        question: "Which is NOT a primary function of a data warehouse?",
+        options: [
+            "Data storage and management",
+            "Decision support and reporting",
+            "Real-time OLTP transaction processing",
+            "Data integration from multiple sources"
+        ],
+        correct: 2,
+        explanation: "Correct answer: Real-time OLTP transaction processing. OLTP is handled by operational databases, not data warehouses."
+    },
+    {
+        question: "In ETL, what does 'E' stand for?",
+        options: ["Extract", "Encrypt", "Evaluate", "Execute"],
+        correct: 0,
+        explanation: "Correct answer: Extract. ETL begins by extracting data from various sources."
+    },
+    {
+        question: "Which SQL command bulk-loads CSV data into a table?",
+        options: [
+            "INSERT INTO ... VALUES (...)",
+            "LOAD DATA INFILE 'path' INTO TABLE ...",
+            "COPY CSV FROM 'path'",
+            "IMPORT CSV 'path'"
+        ],
+        correct: 1,
+        explanation: "Correct answer: LOAD DATA INFILE 'path' INTO TABLE .... This command loads data from a CSV file into MySQL tables."
+    },
+    {
+        question: "What happens during the Transform phase of ETL?",
+        options: [
+            "Loading data into the warehouse",
+            "Extracting data from sources",
+            "Converting, cleansing, and aggregating data",
+            "Querying reports"
+        ],
+        correct: 2,
+        explanation: "Correct answer: Converting, cleansing, and aggregating data to ensure consistency and quality."
+    },
+    {
+        question: "What is the purpose of the Load phase in ETL?",
+        options: [
+            "Validate data quality",
+            "Store transformed data into the warehouse",
+            "Extract data from sources",
+            "Analyze data"
+        ],
+        correct: 1,
+        explanation: "Correct answer: Store transformed data into the data warehouse for analysis."
+    },
+    {
+        question: "Which table stores descriptive attributes in a warehouse?",
+        options: ["Fact table", "Log table", "Dimension table", "Staging table"],
+        correct: 2,
+        explanation: "Correct answer: Dimension table. Dimensions provide context for facts, such as time or product."
+    },
+    {
+        question: "Which table stores quantitative measurements or metrics?",
+        options: ["Dimension table", "Fact table", "Lookup table", "Staging table"],
+        correct: 1,
+        explanation: "Correct answer: Fact table. Facts contain numeric metrics, like sales revenue or quantity."
+    },
+    {
+        question: "In a star schema, the central table is the:",
+        options: ["Dimension table", "Staging table", "Fact table", "Index table"],
+        correct: 2,
+        explanation: "Correct answer: Fact table, which links to multiple dimension tables in a star schema."
+    },
+    {
+        question: "A snowflake schema differs from star schema by:",
+        options: [
+            "Using only one dimension",
+            "Normalizing dimension tables into sub-dimensions",
+            "Having no fact table",
+            "Storing data in XML"
+        ],
+        correct: 1,
+        explanation: "Correct answer: Normalizing dimension tables into multiple related tables reduces redundancy."
+    },
+    {
+        question: "Which schema is simpler to query but has more redundancy?",
+        options: ["Snowflake", "Star", "Normalized", "Hybrid"],
+        correct: 1,
+        explanation: "Correct answer: Star schema. Its denormalized dimensions simplify queries at the cost of redundancy."
+    },
+    {
+        question: "OLAP stands for:",
+        options: ["OnLine Analytical Processing", "OnLine Application Protocol", "Optimized Linear Access Pattern", "Open Language for Analytics"],
+        correct: 0,
+        explanation: "Correct answer: OnLine Analytical Processing, focusing on complex analytics over multi-dimensional data."
+    },
+    {
+        question: "OLTP systems are optimized for:",
+        options: [
+            "Complex reporting queries",
+            "Historical data analysis",
+            "Transactional CRUD operations",
+            "Batch OLAP processing"
+        ],
+        correct: 2,
+        explanation: "Correct answer: Transactional CRUD (Create, Read, Update, Delete) operations in real time."
+    },
+    {
+        question: "Which OLAP operation fixes a value on one dimension to view a 2D slice?",
+        options: ["Dice", "Drill-down", "Slice", "Pivot"],
+        correct: 2,
+        explanation: "Correct answer: Slice. It selects a rectangular subset of the cube by fixing one dimension."
+    },
+    {
+        question: "Which OLAP operation selects a sub-cube by specifying ranges on multiple dimensions?",
+        options: ["Slice", "Dice", "Roll-up", "Drill-down"],
+        correct: 1,
+        explanation: "Correct answer: Dice. It picks a smaller cube by applying filters on multiple dimensions."
+    },
+    {
+        question: "Drill-down in OLAP means:",
+        options: [
+            "Aggregating data to a higher level",
+            "Rotating the cube axes",
+            "Navigating from summary to detailed data",
+            "Deleting obsolete data"
+        ],
+        correct: 2,
+        explanation: "Correct answer: Navigating from summary (higher level) to more detailed data in a hierarchy."
+    },
+    {
+        question: "Roll-up in OLAP refers to:",
+        options: [
+            "Drilling into detailed records",
+            "Grouping and summarizing data",
+            "Pivoting cube dimensions",
+            "Loading data into warehouse"
+        ],
+        correct: 1,
+        explanation: "Correct answer: Grouping and summarizing data, rolling up to a higher-level view."
+    },
+    {
+        question: "Which OLAP operation rotates the axes of the data cube?",
+        options: ["Slice", "Dice", "Pivot", "Roll-up"],
+        correct: 2,
+        explanation: "Correct answer: Pivot. It rotates the cube to view data from different perspectives."
+    },
+    {
+        question: "Which SQL clause generates subtotals across all combinations of specified columns?",
+        options: ["GROUP BY ROLLUP", "GROUP BY CUBE", "GROUP BY ALL", "GROUP BY WITH TOTALS"],
+        correct: 1,
+        explanation: "Correct answer: GROUP BY CUBE. It creates subtotals for all combinations of listed columns."
+    },
+    {
+        question: "Normalization in DWH design is typically used in:",
+        options: [
+            "OLAP schemas",
+            "ETL processes",
+            "OLTP operational databases",
+            "Data staging area"
+        ],
+        correct: 2,
+        explanation: "Correct answer: OLTP operational databases use normalization to reduce redundancy."
+    },
+    {
+        question: "Denormalization in data warehouses aims to:",
+        options: [
+            "Reduce query performance",
+            "Minimize redundancy",
+            "Combine tables for faster analytics",
+            "Enforce strict constraints"
+        ],
+        correct: 2,
+        explanation: "Correct answer: Combine tables and add redundancy to speed up analytical queries."
+    },
+    {
+        question: "Which of these is a common DWH solution?",
+        options: ["MySQL", "PostgreSQL", "Oracle OLTP", "Amazon Redshift"],
+        correct: 3,
+        explanation: "Correct answer: Amazon Redshift is a cloud data warehousing service."
+    },
+    {
+        question: "One challenge of data integration in DWH is:",
+        options: [
+            "Real-time transaction locks",
+            "Handling large volume and varied data formats",
+            "Ensuring ACID compliance",
+            "Implementing user authentication"
+        ],
+        correct: 1,
+        explanation: "Correct answer: Handling large volumes of diverse data formats during extraction."
+    },
+    {
+        question: "The staging area in DWH architecture is used for:",
+        options: [
+            "Final reporting",
+            "Real-time queries",
+            "Temporary storage and transformation",
+            "User authentication"
+        ],
+        correct: 2,
+        explanation: "Correct answer: Temporary storage and processing of raw data before loading into the warehouse."
+    },
+    {
+        question: "A primary benefit of DWH vs operational DBMS is:",
+        options: [
+            "Supports transactional locking",
+            "Ensures immediate consistency",
+            "Optimized for complex analytical queries",
+            "Requires less storage"
+        ],
+        correct: 2,
+        explanation: "Correct answer: Optimized for fast, complex analytical queries over historical data."
+    }
+];
+
+
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedAnswers = [];
+        let quizStarted = false;
+
+        startQuiz();
+
+        function startQuiz() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('quiz-screen').style.display = 'block';
+            quizStarted = true;
+            selectedAnswers = new Array(questions.length).fill(-1);
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('question-number').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            document.getElementById('progress-text').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            document.getElementById('question-text').innerHTML = question.question;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                
+                // Check if option contains code
+                if (option.includes('SELECT') || option.includes('CREATE') || option.includes('INSERT') || option.includes('ALTER')) {
+                    optionElement.innerHTML = `<div class="option-code">${option}</div>`;
+                } else {
+                    optionElement.textContent = option;
+                }
+                
+                optionElement.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Update progress bar
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+            
+            // Update navigation buttons
+            document.getElementById('prev-btn').disabled = currentQuestion === 0;
+            document.getElementById('next-btn').disabled = true;
+            document.getElementById('next-btn').textContent = currentQuestion === questions.length - 1 ? 'Finish Quiz' : 'Next Question';
+            
+            // Hide explanation
+            document.getElementById('explanation').style.display = 'none';
+            
+            // Show previous selection if any
+            if (selectedAnswers[currentQuestion] !== -1) {
+                const options = document.querySelectorAll('.option');
+                options[selectedAnswers[currentQuestion]].classList.add('selected');
+                document.getElementById('next-btn').disabled = false;
+            }
+        }
+
+        function selectOption(index) {
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => option.classList.remove('selected'));
+            options[index].classList.add('selected');
+            
+            selectedAnswers[currentQuestion] = index;
+            document.getElementById('next-btn').disabled = false;
+            
+            // Show explanation immediately
+            showExplanation();
+        }
+
+        function showExplanation() {
+            const question = questions[currentQuestion];
+            const selectedIndex = selectedAnswers[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            
+            // Disable all options
+            options.forEach(option => option.classList.add('disabled'));
+            
+            // Show correct and incorrect answers
+            options.forEach((option, index) => {
+                if (index === question.correct) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex && index !== question.correct) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            // Show explanation
+            const explanationDiv = document.getElementById('explanation');
+            explanationDiv.innerHTML = `
+                <h4>💡 Explanation:</h4>
+                <p>${question.explanation}</p>
+            `;
+            explanationDiv.style.display = 'block';
+        }
+
+        function nextQuestion() {
+            if (selectedAnswers[currentQuestion] === questions[currentQuestion].correct) {
+                score++;
+            }
+            
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion();
+            } else {
+                showResults();
+            }
+            
+            updateScore();
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion();
+            }
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+        }
+
+        function showResults() {
+            document.getElementById('quiz-screen').style.display = 'none';
+            document.getElementById('results-screen').style.display = 'block';
+            
+            const percentage = Math.round((score / questions.length) * 100);
+            const finalScoreElement = document.getElementById('final-score');
+            finalScoreElement.textContent = `${score}/${questions.length} (${percentage}%)`;
+            
+            // Color code the score
+            if (percentage >= 90) {
+                finalScoreElement.className = 'score excellent';
+            } else if (percentage >= 75) {
+                finalScoreElement.className = 'score good';
+            } else if (percentage >= 60) {
+                finalScoreElement.className = 'score average';
+            } else {
+                finalScoreElement.className = 'score poor';
+            }
+            
+            // Performance message
+            let message = '';
+            if (percentage >= 90) {
+                message = '🎉 Outstanding! You have excellent command of SQL fundamentals!';
+            } else if (percentage >= 75) {
+                message = '👍 Great job! You have a solid understanding';
+            }
+        }
+	</script>
+</body>
+</html>
