@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INF2003 Database Systems - Lecture 2 Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .quiz-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quiz-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #1e3c72, #2a5298);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .progress-container {
+            margin-bottom: 30px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1e3c72, #2a5298);
+            transition: width 0.3s ease;
+            border-radius: 5px;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-number {
+            color: #1e3c72;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        .question-text {
+            font-size: 1.4em;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #495057;
+            overflow-x: auto;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 18px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            font-size: 1.1em;
+        }
+
+        .option:hover {
+            border-color: #1e3c72;
+            background: #e6f3ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.1);
+        }
+
+        .option.selected {
+            border-color: #1e3c72;
+            background: #e6f3ff;
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.2);
+        }
+
+        .option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .option.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .option-code {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            background: #f1f3f4;
+            padding: 8px 12px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 35px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(30, 60, 114, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .score-display {
+            text-align: center;
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .explanation {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            margin-top: 25px;
+            border-radius: 0 8px 8px 0;
+            text-align: left;
+        }
+
+        .explanation h4 {
+            color: #1976d2;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .explanation p {
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .start-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .start-screen h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 2.2em;
+        }
+
+        .start-screen p {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 35px;
+            line-height: 1.6;
+        }
+
+        .quiz-info {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 35px;
+            text-align: left;
+        }
+
+        .quiz-info h3 {
+            color: #1e3c72;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+        }
+
+        .quiz-info ul {
+            color: #555;
+            line-height: 2;
+            font-size: 1.1em;
+        }
+
+        .results {
+            text-align: center;
+            padding: 40px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .results h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 2.2em;
+        }
+
+        .score {
+            font-size: 3.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .score.excellent { color: #28a745; }
+        .score.good { color: #17a2b8; }
+        .score.average { color: #ffc107; }
+        .score.poor { color: #dc3545; }
+
+        .performance-message {
+            font-size: 1.3em;
+            margin-bottom: 30px;
+            color: #555;
+        }
+
+        @media (max-width: 768px) {
+            .quiz-container {
+                padding: 25px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .question-text {
+                font-size: 1.2em;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="header">
+            <h1>Lecture 2 Quiz</h1>
+            <p>Lecture 2: SQL Basics & Data Manipulation - AY24/25 T3</p>
+        </div>
+
+        <div id="start-screen" class="start-screen">
+            <h2>Welcome to the SQL Fundamentals Quiz!</h2>
+            <p>Test your knowledge on SQL basics, data types, DDL, DML, and query operations.</p>
+            
+            <div class="quiz-info">
+                <h3>📚 Quiz Coverage:</h3>
+                <ul>
+                    <li>🔧 <strong>SQL Basics:</strong> Syntax, comments, case sensitivity</li>
+                    <li>🏗️ <strong>DDL Commands:</strong> CREATE, ALTER, DROP statements</li>
+                    <li>📊 <strong>Data Types:</strong> CHAR, VARCHAR, INT, NUMERIC, DATE</li>
+                    <li>📝 <strong>DML Operations:</strong> INSERT, SELECT, WHERE clauses</li>
+                    <li>🔍 <strong>Query Operations:</strong> Multiple tables, joins, pattern matching</li>
+                    <li>🎯 <strong>String Operations:</strong> LIKE operator, wildcards</li>
+                </ul>
+            </div>
+
+            <div class="quiz-info">
+                <h3>🎯 Quiz Details:</h3>
+                <ul>
+                    <li>📊 <strong>22 Questions</strong> covering all lecture topics</li>
+                    <li>🎯 <strong>Multiple Choice</strong> with code examples</li>
+                    <li>⏱️ <strong>Self-paced</strong> - no time pressure</li>
+                    <li>📝 <strong>Detailed explanations</strong> for each answer</li>
+                    <li>🏆 <strong>Instant feedback</strong> and final score</li>
+                </ul>
+            </div>
+            
+            <button class="btn btn-primary" onclick="startQuiz()">Start SQL Quiz</button>
+        </div>
+
+        <div id="quiz-screen" style="display: none;">
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="progress-text">Question 1 of 22</span>
+                </div>
+            </div>
+            
+            <div class="score-display">
+                <span>Current Score: <span id="score">0</span> / <span id="total">22</span></span>
+            </div>
+
+            <div class="question-container">
+                <div class="question-number" id="question-number">Question 1 of 22</div>
+                <div class="question-text" id="question-text"></div>
+                <div class="options" id="options"></div>
+                <div class="explanation" id="explanation" style="display: none;"></div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-secondary" id="prev-btn" onclick="prevQuestion()" disabled>Previous</button>
+                <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()" disabled>Next Question</button>
+            </div>
+        </div>
+
+        <div id="results-screen" style="display: none;">
+            <div class="results">
+                <h2>🎉 Quiz Complete!</h2>
+                <div class="score" id="final-score">0/22</div>
+                <div class="performance-message" id="performance-message"></div>
+                <button class="btn btn-primary" onclick="restartQuiz()">Restart Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "What does SQL stand for and what was it originally called?",
+                options: [
+                    "Structured Query Language, originally called Standard Query Language",
+                    "Structured Query Language, originally called Structured English Query Language",
+                    "Simple Query Language, originally called Structured Query Language",
+                    "Standard Query Language, originally called Simple English Query Language"
+                ],
+                correct: 1,
+                explanation: "SQL stands for Structured Query Language and was originally called Structured English Query Language by IBM. It was designed to make database queries more like speaking English."
+            },
+            {
+                question: "Which of the following is NOT mentioned as a main type of SQL?",
+                options: [
+                    "DDL (Data Definition Language)",
+                    "DML (Data Manipulation Language)",
+                    "DCL (Data Control Language)",
+                    "Views and transactions"
+                ],
+                correct: 2,
+                explanation: "The lecture mentions DDL, DML, and 'views and transactions' as main types. While DCL exists, the lecture notes that some people use different groupings and mentions following 'simple and popular grouping' of only DDL and DML."
+            },
+            {
+                question: "What is the correct way to add a comment in SQL?",
+                options: [
+                    "// This is a comment",
+                    "# This is a comment",
+                    "-- This is a comment",
+                    "<!-- This is a comment -->"
+                ],
+                correct: 2,
+                explanation: "SQL supports two types of comments: single line comments using '--' and block comments using '/* ... */'. The double dash (--) is used for single line comments in SQL2008."
+            },
+            {
+                question: "Which data type would be most appropriate for storing a student ID that must be exactly 9 characters long?",
+                options: [
+                    "VARCHAR(9)",
+                    "CHAR(9)",
+                    "INT",
+                    "TEXT"
+                ],
+                correct: 1,
+                explanation: "CHAR(n) is used for strings with fixed length n, while VARCHAR(n) is for strings with maximum length n. Since student IDs have a fixed length of 9 characters, CHAR(9) is more appropriate."
+            },
+            {
+                question: "What is the difference between CHAR(n) and VARCHAR(n)?",
+                options: [
+                    "CHAR(n) is for numbers, VARCHAR(n) is for text",
+                    "CHAR(n) has fixed length n, VARCHAR(n) has maximum length n",
+                    "CHAR(n) is case-sensitive, VARCHAR(n) is not",
+                    "There is no difference"
+                ],
+                correct: 1,
+                explanation: "CHAR(n) creates a string with fixed length n (always uses n characters), while VARCHAR(n) creates a string with maximum length n (uses only as many characters as needed, up to n)."
+            },
+            {
+                question: "Which SQL statement is used to create a new database?",
+                options: [
+                    "CREATE DATABASE db_name;",
+                    "NEW DATABASE db_name;",
+                    "MAKE DATABASE db_name;",
+                    "ADD DATABASE db_name;"
+                ],
+                correct: 0,
+                explanation: "The CREATE DATABASE statement is used to create a new database. The syntax is 'CREATE DATABASE db_name;' and it's good practice to check if the database exists first."
+            },
+            {
+                question: "What does NUMERIC(P, D) represent?",
+                options: [
+                    "P is the decimal places, D is the total digits",
+                    "P is the precision (total digits), D is the scale (digits after decimal)",
+                    "P is the power, D is the divisor",
+                    "P is the primary value, D is the default value"
+                ],
+                correct: 1,
+                explanation: "In NUMERIC(P, D), P represents precision (the total number of digits) and D represents scale (the number of digits after the decimal place). P determines the bytes used for storage."
+            },
+            {
+                question: "Which data types are mentioned for storing very large objects like full articles?",
+                options: [
+                    "CHAR and VARCHAR",
+                    "INT and BIGINT",
+                    "BLOB, CLOB, TEXT",
+                    "FLOAT and DOUBLE"
+                ],
+                correct: 2,
+                explanation: "For very large objects like full articles, the lecture mentions using BLOB (Binary Large Object), CLOB (Character Large Object), and TEXT data types."
+            },
+            {
+                question: "What is the purpose of the PRIMARY KEY constraint?",
+                options: [
+                    "To make queries faster",
+                    "To ensure no duplicate rows and uniquely identify each row",
+                    "To sort the data",
+                    "To create relationships between tables"
+                ],
+                correct: 1,
+                explanation: "The PRIMARY KEY constraint ensures that there are no duplicate rows in the table and uniquely identifies each row. The database system automatically checks for duplicates every time data is inserted."
+            },
+            {
+                question: "Which INSERT statement syntax allows you to specify only some columns?",
+                options: [
+                    "INSERT INTO table_name VALUES (val1, val2, ...);",
+                    "INSERT INTO table_name (col3, col5, ...) VALUES (val3, val5, ...);",
+                    "INSERT table_name SET col1=val1, col2=val2;",
+                    "INSERT (col1, col2) INTO table_name VALUES (val1, val2);"
+                ],
+                correct: 1,
+                explanation: "The syntax 'INSERT INTO table_name (col3, col5, ...) VALUES (val3, val5, ...);' allows you to specify only some columns, useful for columns with default values. The order of values must match the order of specified columns."
+            },
+            {
+                question: "What does SELECT DISTINCT do?",
+                options: [
+                    "Selects only unique rows, removing duplicates",
+                    "Selects rows in a specific order",
+                    "Selects the first row only",
+                    "Selects rows with different data types"
+                ],
+                correct: 0,
+                explanation: "SELECT DISTINCT removes duplicate rows from the result set, showing only unique combinations of the selected columns. However, it can be time-consuming to execute."
+            },
+            {
+                question: "In the query 'SELECT S.name FROM Sailors S, Reserves R WHERE S.sid=R.sid AND R.bid=103', what does 'S' and 'R' represent?",
+                options: [
+                    "Column names",
+                    "Database names",
+                    "Range variables (table aliases)",
+                    "Function names"
+                ],
+                correct: 2,
+                explanation: "S and R are range variables (also called table aliases) used to give shorter names to tables. This is especially useful when a table appears multiple times in a query or when dealing with multiple tables."
+            },
+            {
+                question: "Which SQL operator is used for pattern matching?",
+                options: [
+                    "MATCH",
+                    "PATTERN",
+                    "LIKE",
+                    "FIND"
+                ],
+                correct: 2,
+                explanation: "The LIKE operator is used for pattern matching in SQL, along with wildcard symbols like '_' (exactly one character) and '%' (zero or more characters)."
+            },
+            {
+                question: "In the pattern '_SE%', what does it match?",
+                options: [
+                    "Exactly 3 characters starting with SE",
+                    "At least 3 characters with 2nd and 3rd characters being S and E",
+                    "Any string containing SE",
+                    "Strings ending with SE"
+                ],
+                correct: 1,
+                explanation: "The pattern '_SE%' matches strings with at least 3 characters where the 2nd character is 'S' and the 3rd character is 'E'. The underscore (_) matches exactly one character, and % matches zero or more characters."
+            },
+            {
+                question: "What is the difference between '_' and '%' wildcards?",
+                options: [
+                    "_' matches any character, '%' matches specific characters",
+                    "'_' matches exactly 1 character, '%' matches 0 or more characters",
+                    "'_' matches 0 or more characters, '%' matches exactly 1 character",
+                    "There is no difference"
+                ],
+                correct: 1,
+                explanation: "The '_' wildcard matches exactly one arbitrary character, while '%' matches zero or more arbitrary characters. This makes '%' more flexible for pattern matching."
+            },
+            {
+                question: "Which of the following is a correct DDL command to add a column to an existing table?",
+                options: [
+                    "ALTER TABLE table_name ADD column_name datatype;",
+                    "ADD COLUMN table_name column_name datatype;",
+                    "INSERT COLUMN table_name column_name datatype;",
+                    "CREATE COLUMN table_name column_name datatype;"
+                ],
+                correct: 0,
+                explanation: "The ALTER TABLE statement with ADD is used to add a new column to an existing table. The syntax is 'ALTER TABLE table_name ADD column_name datatype;'."
+            },
+            {
+                question: "What is the issue with 'Jeff' LIKE 'Jeff ' in SQL?",
+                options: [
+                    "It will return TRUE",
+                    "It will return FALSE because blanks are significant",
+                    "It will cause an error",
+                    "It depends on the database system"
+                ],
+                correct: 1,
+                explanation: "The expression 'Jeff' LIKE 'Jeff ' returns FALSE because blanks (spaces) are significant in the LIKE operator. 'Jeff' has 4 characters while 'Jeff ' has 5 characters including the trailing space."
+            },
+            {
+                question: "Which of the following represents the correct syntax for creating a table with a primary key?",
+                options: [
+                    "CREATE TABLE table_name (col1 datatype PRIMARY KEY, col2 datatype);",
+                    "CREATE TABLE table_name (col1 datatype, col2 datatype, PRIMARY KEY (col1));",
+                    "Both A and B are correct",
+                    "Neither A nor B is correct"
+                ],
+                correct: 2,
+                explanation: "Both syntaxes are correct for creating a primary key. You can specify PRIMARY KEY after the column definition, or specify it after all columns using PRIMARY KEY (colname). The latter allows for composite primary keys."
+            },
+            {
+                question: "What does DML stand for and what operations does it include?",
+                options: [
+                    "Data Management Language - CREATE, ALTER, DROP",
+                    "Data Manipulation Language - CRUD operations (Create, Read, Update, Delete)",
+                    "Data Model Language - INSERT, SELECT, UPDATE",
+                    "Database Management Language - GRANT, REVOKE"
+                ],
+                correct: 1,
+                explanation: "DML stands for Data Manipulation Language and includes CRUD operations: Create (INSERT), Read (SELECT), Update (UPDATE), and Delete (DELETE). These are row-wise operations that manipulate actual data."
+            },
+            {
+                question: "When would you use range variables in SQL?",
+                options: [
+                    "When you want to rename columns",
+                    "When a relation appears multiple times or for shorter table names",
+                    "When you want to sort results",
+                    "When you want to group results"
+                ],
+                correct: 1,
+                explanation: "Range variables (table aliases) are needed when a relation appears multiple times in a query (like self-joins) or simply to provide shorter, more convenient names for tables in multi-table queries."
+            },
+            {
+                question: "What is the purpose of the WHERE clause in a SELECT statement?",
+                options: [
+                    "To specify which columns to return",
+                    "To specify which tables to use",
+                    "To specify the selection condition (which rows to return)",
+                    "To specify the order of results"
+                ],
+                correct: 2,
+                explanation: "The WHERE clause specifies the selection condition - it determines which rows should be included in the result set. It corresponds to the selection operator in relational algebra."
+            },
+            {
+                question: "In the query that finds sailors who sailed different boats on the same day, why do we need two instances of the Reserves table (R1, R2)?",
+                options: [
+                    "To make the query faster",
+                    "To compare different records from the same table",
+                    "To avoid syntax errors",
+                    "To create a backup"
+                ],
+                correct: 1,
+                explanation: "We need two instances (R1, R2) of the Reserves table to compare different reservation records from the same table. This allows us to find sailors who have multiple reservations on the same day but for different boats (R1.day = R2.day AND R1.bid <> R2.bid)."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedAnswers = [];
+        let quizStarted = false;
+
+        function startQuiz() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('quiz-screen').style.display = 'block';
+            quizStarted = true;
+            selectedAnswers = new Array(questions.length).fill(-1);
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('question-number').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            document.getElementById('progress-text').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            document.getElementById('question-text').innerHTML = question.question;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                
+                // Check if option contains code
+                if (option.includes('SELECT') || option.includes('CREATE') || option.includes('INSERT') || option.includes('ALTER')) {
+                    optionElement.innerHTML = `<div class="option-code">${option}</div>`;
+                } else {
+                    optionElement.textContent = option;
+                }
+                
+                optionElement.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Update progress bar
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+            
+            // Update navigation buttons
+            document.getElementById('prev-btn').disabled = currentQuestion === 0;
+            document.getElementById('next-btn').disabled = true;
+            document.getElementById('next-btn').textContent = currentQuestion === questions.length - 1 ? 'Finish Quiz' : 'Next Question';
+            
+            // Hide explanation
+            document.getElementById('explanation').style.display = 'none';
+            
+            // Show previous selection if any
+            if (selectedAnswers[currentQuestion] !== -1) {
+                const options = document.querySelectorAll('.option');
+                options[selectedAnswers[currentQuestion]].classList.add('selected');
+                document.getElementById('next-btn').disabled = false;
+            }
+        }
+
+        function selectOption(index) {
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => option.classList.remove('selected'));
+            options[index].classList.add('selected');
+            
+            selectedAnswers[currentQuestion] = index;
+            document.getElementById('next-btn').disabled = false;
+            
+            // Show explanation immediately
+            showExplanation();
+        }
+
+        function showExplanation() {
+            const question = questions[currentQuestion];
+            const selectedIndex = selectedAnswers[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            
+            // Disable all options
+            options.forEach(option => option.classList.add('disabled'));
+            
+            // Show correct and incorrect answers
+            options.forEach((option, index) => {
+                if (index === question.correct) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex && index !== question.correct) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            // Show explanation
+            const explanationDiv = document.getElementById('explanation');
+            explanationDiv.innerHTML = `
+                <h4>💡 Explanation:</h4>
+                <p>${question.explanation}</p>
+            `;
+            explanationDiv.style.display = 'block';
+        }
+
+        function nextQuestion() {
+            if (selectedAnswers[currentQuestion] === questions[currentQuestion].correct) {
+                score++;
+            }
+            
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion();
+            } else {
+                showResults();
+            }
+            
+            updateScore();
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion();
+            }
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+        }
+
+        function showResults() {
+            document.getElementById('quiz-screen').style.display = 'none';
+            document.getElementById('results-screen').style.display = 'block';
+            
+            const percentage = Math.round((score / questions.length) * 100);
+            const finalScoreElement = document.getElementById('final-score');
+            finalScoreElement.textContent = `${score}/${questions.length} (${percentage}%)`;
+            
+            // Color code the score
+            if (percentage >= 90) {
+                finalScoreElement.className = 'score excellent';
+            } else if (percentage >= 75) {
+                finalScoreElement.className = 'score good';
+            } else if (percentage >= 60) {
+                finalScoreElement.className = 'score average';
+            } else {
+                finalScoreElement.className = 'score poor';
+            }
+            
+            // Performance message
+            let message = '';
+            if (percentage >= 90) {
+                message = '🎉 Outstanding! You have excellent command of SQL fundamentals!';
+            } else if (percentage >= 75) {
+                message = '👍 Great job! You have a solid understanding';
+            }
+        }
+	</script>
+</body>
+</html>
