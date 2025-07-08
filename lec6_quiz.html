@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INF2003 Lecture 6 Quiz: Transactions & NoSQL I</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .quiz-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quiz-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #1e3c72, #2a5298);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .progress-container {
+            margin-bottom: 30px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1e3c72, #2a5298);
+            transition: width 0.3s ease;
+            border-radius: 5px;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-number {
+            color: #1e3c72;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        .question-text {
+            font-size: 1.4em;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #495057;
+            overflow-x: auto;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 18px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            font-size: 1.1em;
+        }
+
+        .option:hover {
+            border-color: #1e3c72;
+            background: #e6f3ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.1);
+        }
+
+        .option.selected {
+            border-color: #1e3c72;
+            background: #e6f3ff;
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.2);
+        }
+
+        .option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .option.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .option-code {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            background: #f1f3f4;
+            padding: 8px 12px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 35px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(30, 60, 114, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .score-display {
+            text-align: center;
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .explanation {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            margin-top: 25px;
+            border-radius: 0 8px 8px 0;
+            text-align: left;
+        }
+
+        .explanation h4 {
+            color: #1976d2;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .explanation p {
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .start-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .start-screen h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 2.2em;
+        }
+
+        .start-screen p {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 35px;
+            line-height: 1.6;
+        }
+
+        .quiz-info {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 35px;
+            text-align: left;
+        }
+
+        .quiz-info h3 {
+            color: #1e3c72;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+        }
+
+        .quiz-info ul {
+            color: #555;
+            line-height: 2;
+            font-size: 1.1em;
+        }
+
+        .results {
+            text-align: center;
+            padding: 40px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .results h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 2.2em;
+        }
+
+        .score {
+            font-size: 3.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .score.excellent { color: #28a745; }
+        .score.good { color: #17a2b8; }
+        .score.average { color: #ffc107; }
+        .score.poor { color: #dc3545; }
+
+        .performance-message {
+            font-size: 1.3em;
+            margin-bottom: 30px;
+            color: #555;
+        }
+
+        @media (max-width: 768px) {
+            .quiz-container {
+                padding: 25px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .question-text {
+                font-size: 1.2em;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="header">
+            <h1>Lecture 2 Quiz</h1>
+            <p>Lecture 2: SQL Basics & Data Manipulation - AY24/25 T3</p>
+        </div>
+
+        <div id="start-screen" class="start-screen">
+            <h2>Welcome to the SQL Fundamentals Quiz!</h2>
+            <p>Test your knowledge on SQL basics, data types, DDL, DML, and query operations.</p>
+            
+            <div class="quiz-info">
+                <h3>📚 Quiz Coverage:</h3>
+                <ul>
+                    <li>🔧 <strong>SQL Basics:</strong> Syntax, comments, case sensitivity</li>
+                    <li>🏗️ <strong>DDL Commands:</strong> CREATE, ALTER, DROP statements</li>
+                    <li>📊 <strong>Data Types:</strong> CHAR, VARCHAR, INT, NUMERIC, DATE</li>
+                    <li>📝 <strong>DML Operations:</strong> INSERT, SELECT, WHERE clauses</li>
+                    <li>🔍 <strong>Query Operations:</strong> Multiple tables, joins, pattern matching</li>
+                    <li>🎯 <strong>String Operations:</strong> LIKE operator, wildcards</li>
+                </ul>
+            </div>
+
+            <div class="quiz-info">
+                <h3>🎯 Quiz Details:</h3>
+                <ul>
+                    <li>📊 <strong>22 Questions</strong> covering all lecture topics</li>
+                    <li>🎯 <strong>Multiple Choice</strong> with code examples</li>
+                    <li>⏱️ <strong>Self-paced</strong> - no time pressure</li>
+                    <li>📝 <strong>Detailed explanations</strong> for each answer</li>
+                    <li>🏆 <strong>Instant feedback</strong> and final score</li>
+                </ul>
+            </div>
+            
+            <button class="btn btn-primary" onclick="startQuiz()">Start SQL Quiz</button>
+        </div>
+
+        <div id="quiz-screen" style="display: none;">
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="progress-text">Question 1 of 25</span>
+                </div>
+            </div>
+            
+            <div class="score-display">
+                <span>Current Score: <span id="score">0</span> / <span id="total">25</span></span>
+            </div>
+
+            <div class="question-container">
+                <div class="question-number" id="question-number">Question 1 of 25</div>
+                <div class="question-text" id="question-text"></div>
+                <div class="options" id="options"></div>
+                <div class="explanation" id="explanation" style="display: none;"></div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-secondary" id="prev-btn" onclick="prevQuestion()" disabled>Previous</button>
+                <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()" disabled>Next Question</button>
+            </div>
+        </div>
+
+        <div id="results-screen" style="display: none;">
+            <div class="results">
+                <h2>🎉 Quiz Complete!</h2>
+                <div class="score" id="final-score">0/22</div>
+                <div class="performance-message" id="performance-message"></div>
+                <button class="btn btn-primary" onclick="restartQuiz()">Restart Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+const questions = [
+    {
+        question: "What is a database transaction?",
+        options: [
+            "A single SQL statement",
+            "A logical unit of work comprising multiple operations",
+            "A type of NoSQL query",
+            "An index rebuild process"
+        ],
+        correct: 1,
+        explanation: "Correct answer: A logical unit of work comprising multiple operations."
+    },
+    {
+        question: "Which ACID property ensures all operations complete or none do?",
+        options: ["Atomicity", "Consistency", "Isolation", "Durability"],
+        correct: 0,
+        explanation: "Correct answer: Atomicity guarantees the transaction is all-or-nothing."
+    },
+    {
+        question: "Which ACID property guarantees the database remains valid after a transaction?",
+        options: ["Atomicity", "Consistency", "Isolation", "Durability"],
+        correct: 1,
+        explanation: "Correct answer: Consistency ensures data integrity constraints are preserved."
+    },
+    {
+        question: "Which ACID property prevents concurrent transactions from interfering?",
+        options: ["Atomicity", "Consistency", "Isolation", "Durability"],
+        correct: 2,
+        explanation: "Correct answer: Isolation ensures concurrent transactions do not affect each other."
+    },
+    {
+        question: "Which ACID property makes changes permanent after commit?",
+        options: ["Atomicity", "Consistency", "Isolation", "Durability"],
+        correct: 3,
+        explanation: "Correct answer: Durability ensures once committed, data persists despite failures."
+    },
+    {
+        question: "Which command finalizes a transaction and makes changes permanent?",
+        options: ["ROLLBACK", "SAVEPOINT", "COMMIT", "LOCK TABLE"],
+        correct: 2,
+        explanation: "Correct answer: COMMIT ends the transaction and saves all changes."
+    },
+    {
+        question: "Which command undoes all changes in the current transaction?",
+        options: ["COMMIT", "ROLLBACK", "ALTER TABLE", "SELECT"],
+        correct: 1,
+        explanation: "Correct answer: ROLLBACK reverts all uncommitted changes."
+    },
+    {
+        question: "SAVEPOINT in SQL allows you to:",
+        options: [
+            "Commit the transaction",
+            "Roll back to a named point within a transaction",
+            "Lock a table",
+            "Create a backup file"
+        ],
+        correct: 1,
+        explanation: "Correct answer: SAVEPOINT creates a marker to which you can roll back selectively."
+    },
+    {
+        question: "Which statement is NOT part of Transaction Control Language (TCL)?",
+        options: ["COMMIT", "ROLLBACK", "GRANT", "SAVEPOINT"],
+        correct: 2,
+        explanation: "Correct answer: GRANT is a DCL command, not TCL."
+    },
+    {
+        question: "What phenomenon occurs when a transaction reads uncommitted data from another?",
+        options: ["Dirty read", "Phantom read", "Lost update", "Deadlock"],
+        correct: 0,
+        explanation: "Correct answer: Dirty read occurs when reading data from uncommitted transactions."
+    },
+    {
+        question: "What is a non-repeatable read?",
+        options: [
+            "Seeing different rows in separate queries",
+            "Seeing different values for the same row in separate queries",
+            "Retrieving new rows that appear",
+            "Locking issue"
+        ],
+        correct: 1,
+        explanation: "Correct answer: Non-repeatable read sees different values for the same row in one transaction."
+    },
+    {
+        question: "What is a phantom read?",
+        options: [
+            "Reading uncommitted data",
+            "Re-reading a row with changed value",
+            "New rows appear on re-query",
+            "Same row deleted"
+        ],
+        correct: 2,
+        explanation: "Correct answer: Phantom read occurs when new rows matching a query appear on re-execution."
+    },
+    {
+        question: "Which isolation level prohibits dirty reads but allows non-repeatable reads?",
+        options: ["READ UNCOMMITTED", "READ COMMITTED", "REPEATABLE READ", "SERIALIZABLE"],
+        correct: 1,
+        explanation: "Correct answer: READ COMMITTED disallows dirty reads but allows non-repeatable reads."
+    },
+    {
+        question: "Which isolation level prevents all three phenomena: dirty, non-repeatable, phantom?",
+        options: ["READ UNCOMMITTED", "READ COMMITTED", "REPEATABLE READ", "SERIALIZABLE"],
+        correct: 3,
+        explanation: "Correct answer: SERIALIZABLE provides full isolation, preventing all anomalies."
+    },
+    {
+        question: "What is the default autocommit mode in many SQL systems?",
+        options: ["OFF", "ON", "SERIALIZABLE", "READ COMMITTED"],
+        correct: 1,
+        explanation: "Correct answer: ON, meaning each statement is committed unless inside an explicit transaction."
+    },
+    {
+        question: "NoSQL databases are characterized as:",
+        options: [
+            "Strictly relational",
+            "Non-relational or not only SQL",
+            "Always ACID-compliant",
+            "Using fixed schemas"
+        ],
+        correct: 1,
+        explanation: "Correct answer: NoSQL stands for non-relational or not only SQL systems."
+    },
+    {
+        question: "BASE in NoSQL stands for:",
+        options: [
+            "Basically Available, Soft State, Eventually Consistent",
+            "Bulk, Asynchronous, Serializable, Efficient",
+            "Binary, Atomic, Serializable, Elastic",
+            "Basic SQL Enhancement"
+        ],
+        correct: 0,
+        explanation: "Correct answer: BASE describes the weaker consistency model of many NoSQL systems."
+    },
+    {
+        question: "Which is NOT a NoSQL database type?",
+        options: ["Document", "Key-value", "Column-family", "Stored Procedure"],
+        correct: 3,
+        explanation: "Correct answer: Stored Procedure is not a NoSQL type; it’s a database feature."
+    },
+    {
+        question: "Which format is commonly used by document databases like MongoDB?",
+        options: ["XML", "CSV", "JSON/BSON", "Parquet"],
+        correct: 2,
+        explanation: "Correct answer: JSON/BSON is used for document storage in MongoDB and similar systems."
+    },
+    {
+        question: "Replication in NoSQL refers to:",
+        options: [
+            "Splitting data across shards",
+            "Copying data across multiple nodes",
+            "Deleting old data",
+            "Compaction of files"
+        ],
+        correct: 1,
+        explanation: "Correct answer: Replication maintains copies of data on multiple servers for availability."
+    },
+    {
+        question: "Sharding in NoSQL refers to:",
+        options: [
+            "Copying data across nodes",
+            "Partitioning data across nodes",
+            "Encrypting data at rest",
+            "Versioning documents"
+        ],
+        correct: 1,
+        explanation: "Correct answer: Sharding partitions data into subsets (shards) distributed across cluster nodes."
+    },
+    {
+        question: "One advantage of NoSQL databases is:",
+        options: [
+            "Fixed schema requirement",
+            "Horizontal scalability",
+            "Strong consistency by default",
+            "Complex joins"
+        ],
+        correct: 1,
+        explanation: "Correct answer: NoSQL systems often scale horizontally by adding more machines."
+    },
+    {
+        question: "A drawback of NoSQL systems is:",
+        options: [
+            "Eventual consistency",
+            "Rigid schemas",
+            "Limited scalability",
+            "No support for JSON"
+        ],
+        correct: 0,
+        explanation: "Correct answer: Many NoSQL systems adopt eventual consistency, which may not suit all use cases."
+    },
+    {
+        question: "A common use case for document databases is:",
+        options: [
+            "Financial transactions requiring strict ACID",
+            "Content management systems with flexible schemas",
+            "High-frequency trading",
+            "Batch ETL with fixed schemas"
+        ],
+        correct: 1,
+        explanation: "Correct answer: CMS often benefits from flexible, schema-less document storage."
+    }
+];
+
+
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedAnswers = [];
+        let quizStarted = false;
+
+        function startQuiz() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('quiz-screen').style.display = 'block';
+            quizStarted = true;
+            selectedAnswers = new Array(questions.length).fill(-1);
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('question-number').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            document.getElementById('progress-text').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            document.getElementById('question-text').innerHTML = question.question;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                
+                // Check if option contains code
+                if (option.includes('SELECT') || option.includes('CREATE') || option.includes('INSERT') || option.includes('ALTER')) {
+                    optionElement.innerHTML = `<div class="option-code">${option}</div>`;
+                } else {
+                    optionElement.textContent = option;
+                }
+                
+                optionElement.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Update progress bar
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+            
+            // Update navigation buttons
+            document.getElementById('prev-btn').disabled = currentQuestion === 0;
+            document.getElementById('next-btn').disabled = true;
+            document.getElementById('next-btn').textContent = currentQuestion === questions.length - 1 ? 'Finish Quiz' : 'Next Question';
+            
+            // Hide explanation
+            document.getElementById('explanation').style.display = 'none';
+            
+            // Show previous selection if any
+            if (selectedAnswers[currentQuestion] !== -1) {
+                const options = document.querySelectorAll('.option');
+                options[selectedAnswers[currentQuestion]].classList.add('selected');
+                document.getElementById('next-btn').disabled = false;
+            }
+        }
+
+        function selectOption(index) {
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => option.classList.remove('selected'));
+            options[index].classList.add('selected');
+            
+            selectedAnswers[currentQuestion] = index;
+            document.getElementById('next-btn').disabled = false;
+            
+            // Show explanation immediately
+            showExplanation();
+        }
+
+        function showExplanation() {
+            const question = questions[currentQuestion];
+            const selectedIndex = selectedAnswers[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            
+            // Disable all options
+            options.forEach(option => option.classList.add('disabled'));
+            
+            // Show correct and incorrect answers
+            options.forEach((option, index) => {
+                if (index === question.correct) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex && index !== question.correct) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            // Show explanation
+            const explanationDiv = document.getElementById('explanation');
+            explanationDiv.innerHTML = `
+                <h4>💡 Explanation:</h4>
+                <p>${question.explanation}</p>
+            `;
+            explanationDiv.style.display = 'block';
+        }
+
+        function nextQuestion() {
+            if (selectedAnswers[currentQuestion] === questions[currentQuestion].correct) {
+                score++;
+            }
+            
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion();
+            } else {
+                showResults();
+            }
+            
+            updateScore();
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion();
+            }
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+        }
+
+        function showResults() {
+            document.getElementById('quiz-screen').style.display = 'none';
+            document.getElementById('results-screen').style.display = 'block';
+            
+            const percentage = Math.round((score / questions.length) * 100);
+            const finalScoreElement = document.getElementById('final-score');
+            finalScoreElement.textContent = `${score}/${questions.length} (${percentage}%)`;
+            
+            // Color code the score
+            if (percentage >= 90) {
+                finalScoreElement.className = 'score excellent';
+            } else if (percentage >= 75) {
+                finalScoreElement.className = 'score good';
+            } else if (percentage >= 60) {
+                finalScoreElement.className = 'score average';
+            } else {
+                finalScoreElement.className = 'score poor';
+            }
+            
+            // Performance message
+            let message = '';
+            if (percentage >= 90) {
+                message = '🎉 Outstanding! You have excellent command of SQL fundamentals!';
+            } else if (percentage >= 75) {
+                message = '👍 Great job! You have a solid understanding';
+            }
+        }
+	</script>
+</body>
+</html>
