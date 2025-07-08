@@ -136,7 +136,7 @@
         let currentQuestion = 0, score = 0, selectedAnswers = [];
 
         startQuiz();
-        
+
         function startQuiz() {
             document.getElementById('start-screen').style.display='none';
             document.getElementById('quiz-screen').style.display='block';
@@ -191,6 +191,7 @@
             const msg=document.getElementById('performance-message');
             msg.textContent = pct>=75? 'Strong grasp of SQL Part 2.' : pct>=60? 'Adequate, review weak areas.' : 'Needs further revision.';
         }
+
         function restartQuiz() { score=0; currentQuestion=0; document.getElementById('results-screen').style.display='none'; startQuiz(); }
     </script>
 </body>

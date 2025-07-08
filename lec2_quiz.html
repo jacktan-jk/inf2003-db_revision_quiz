@@ -811,6 +811,21 @@
             } else if (percentage >= 75) {
                 message = '👍 Great job! You have a solid understanding';
             }
+
+            function restartQuiz() {
+                currentQuestion = 0;
+                score = 0;
+                selectedAnswers = [];
+                quizStarted = false;
+                
+                document.getElementById('results-screen').style.display = 'none';
+                document.getElementById('start-screen').style.display = 'block';
+                document.getElementById('score').textContent = '0';
+                document.getElementById('progress').style.width = '0%';
+            }
+
+            // Initialize the quiz
+            updateScore();
         }
 	</script>
 </body>
