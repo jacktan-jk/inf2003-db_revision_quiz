@@ -134,6 +134,9 @@
             { question: "Why use uppercase for SQL keywords?", options: ["It’s mandatory","Improves clarity and distinguishes keywords","Faster execution","Enables keywords as identifiers"], correct: 1, explanation: "Uppercase for keywords is a convention that improves clarity." }
         ];
         let currentQuestion = 0, score = 0, selectedAnswers = [];
+
+        startQuiz();
+        
         function startQuiz() {
             document.getElementById('start-screen').style.display='none';
             document.getElementById('quiz-screen').style.display='block';
