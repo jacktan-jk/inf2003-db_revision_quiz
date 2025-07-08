@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INF2003 Lecture 5 Quiz: Database Refinement & Normalization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .quiz-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quiz-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #1e3c72, #2a5298);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .progress-container {
+            margin-bottom: 30px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1e3c72, #2a5298);
+            transition: width 0.3s ease;
+            border-radius: 5px;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-number {
+            color: #1e3c72;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        .question-text {
+            font-size: 1.4em;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #495057;
+            overflow-x: auto;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 18px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            font-size: 1.1em;
+        }
+
+        .option:hover {
+            border-color: #1e3c72;
+            background: #e6f3ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.1);
+        }
+
+        .option.selected {
+            border-color: #1e3c72;
+            background: #e6f3ff;
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.2);
+        }
+
+        .option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .option.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .option-code {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            background: #f1f3f4;
+            padding: 8px 12px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 35px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(30, 60, 114, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .score-display {
+            text-align: center;
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .explanation {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            margin-top: 25px;
+            border-radius: 0 8px 8px 0;
+            text-align: left;
+        }
+
+        .explanation h4 {
+            color: #1976d2;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .explanation p {
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .start-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .start-screen h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 2.2em;
+        }
+
+        .start-screen p {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 35px;
+            line-height: 1.6;
+        }
+
+        .quiz-info {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 35px;
+            text-align: left;
+        }
+
+        .quiz-info h3 {
+            color: #1e3c72;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+        }
+
+        .quiz-info ul {
+            color: #555;
+            line-height: 2;
+            font-size: 1.1em;
+        }
+
+        .results {
+            text-align: center;
+            padding: 40px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .results h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 2.2em;
+        }
+
+        .score {
+            font-size: 3.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .score.excellent { color: #28a745; }
+        .score.good { color: #17a2b8; }
+        .score.average { color: #ffc107; }
+        .score.poor { color: #dc3545; }
+
+        .performance-message {
+            font-size: 1.3em;
+            margin-bottom: 30px;
+            color: #555;
+        }
+
+        @media (max-width: 768px) {
+            .quiz-container {
+                padding: 25px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .question-text {
+                font-size: 1.2em;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="header">
+            <h1>Lecture 2 Quiz</h1>
+            <p><strong>Coverage:</strong> database refinement and decomposition, functional dependencies, Armstrong’s axioms, closure algorithm, normal forms (1NF, 2NF, 3NF, BCNF), BCNF decomposition algorithm, lossless-join & dependency preservation, anomalies (update, insertion, deletion), design refinement phase.</p>
+        </div>
+
+        <div id="start-screen" class="start-screen">
+            <h2>Welcome to the SQL Fundamentals Quiz!</h2>
+            <p>Test your knowledge on SQL basics, data types, DDL, DML, and query operations.</p>
+            
+            <div class="quiz-info">
+                <h3>📚 Quiz Coverage:</h3>
+                <ul>
+                    <li>🔧 <strong>SQL Basics:</strong> Syntax, comments, case sensitivity</li>
+                    <li>🏗️ <strong>DDL Commands:</strong> CREATE, ALTER, DROP statements</li>
+                    <li>📊 <strong>Data Types:</strong> CHAR, VARCHAR, INT, NUMERIC, DATE</li>
+                    <li>📝 <strong>DML Operations:</strong> INSERT, SELECT, WHERE clauses</li>
+                    <li>🔍 <strong>Query Operations:</strong> Multiple tables, joins, pattern matching</li>
+                    <li>🎯 <strong>String Operations:</strong> LIKE operator, wildcards</li>
+                </ul>
+            </div>
+
+            <div class="quiz-info">
+                <h3>🎯 Quiz Details:</h3>
+                <ul>
+                    <li>📊 <strong>25 Questions</strong> covering all lecture topics</li>
+                    <li>🎯 <strong>Multiple Choice</strong> with code examples</li>
+                    <li>⏱️ <strong>Self-paced</strong> - no time pressure</li>
+                    <li>📝 <strong>Detailed explanations</strong> for each answer</li>
+                    <li>🏆 <strong>Instant feedback</strong> and final score</li>
+                </ul>
+            </div>
+            
+            <button class="btn btn-primary" onclick="startQuiz()">Start SQL Quiz</button>
+        </div>
+
+        <div id="quiz-screen" style="display: none;">
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="progress-text">Question 1 of 25</span>
+                </div>
+            </div>
+            
+            <div class="score-display">
+                <span>Current Score: <span id="score">0</span> / <span id="total">25</span></span>
+            </div>
+
+            <div class="question-container">
+                <div class="question-number" id="question-number">Question 1 of 25</div>
+                <div class="question-text" id="question-text"></div>
+                <div class="options" id="options"></div>
+                <div class="explanation" id="explanation" style="display: none;"></div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-secondary" id="prev-btn" onclick="prevQuestion()" disabled>Previous</button>
+                <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()" disabled>Next Question</button>
+            </div>
+        </div>
+
+        <div id="results-screen" style="display: none;">
+            <div class="results">
+                <h2>🎉 Quiz Complete!</h2>
+                <div class="score" id="final-score">0/22</div>
+                <div class="performance-message" id="performance-message"></div>
+                <button class="btn btn-primary" onclick="restartQuiz()">Restart Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+const questions = [
+    {
+        question: "What kind of anomaly occurs when updating the same data in multiple tuples?",
+        options: ["Insertion anomaly","Deletion anomaly","Update anomaly","Normalization anomaly"],
+        correct: 2,
+        explanation: "Update anomaly: redundant data requires multiple updates; missing one causes inconsistency."
+    },
+    {
+        question: "Which anomaly prevents inserting data due to missing attribute values?",
+        options: ["Update anomaly","Insertion anomaly","Deletion anomaly","Normalization anomaly"],
+        correct: 1,
+        explanation: "Insertion anomaly: inability to add a record because other attribute values are unknown."
+    },
+    {
+        question: "Which anomaly causes loss of other facts when a tuple is deleted?",
+        options: ["Insertion anomaly","Deletion anomaly","Update anomaly","Closure anomaly"],
+        correct: 1,
+        explanation: "Deletion anomaly: deleting a tuple removes facts that were redundantly stored."
+    },
+    {
+        question: "Functional dependency X→Y means:",
+        options: ["X and Y are keys","If two tuples agree on X, they must agree on Y","X is a key for Y","X and Y are multivalued"],
+        correct: 1,
+        explanation: "FD: X→Y indicates tuples with same X values have same Y values."
+    },
+    {
+        question: "Which Armstrong’s axiom states if X⊆Y then Y→X?",
+        options: ["Reflexivity","Augmentation","Transitivity","Decomposition"],
+        correct: 0,
+        explanation: "Reflexivity: if Y is subset of X, then X functionally determines Y."
+    },
+    {
+        question: "Which Armstrong’s axiom states if X→Y then XZ→YZ?",
+        options: ["Reflexivity","Augmentation","Transitivity","Union"],
+        correct: 1,
+        explanation: "Augmentation: you can add the same attributes Z to both sides of an FD."
+    },
+    {
+        question: "Which Armstrong’s axiom states if X→Y and Y→Z then X→Z?",
+        options: ["Reflexivity","Augmentation","Transitivity","Pseudo-transitivity"],
+        correct: 2,
+        explanation: "Transitivity: functional dependencies are transitive."
+    },
+    {
+        question: "In the closure algorithm, the initial set X is:",
+        options: ["Empty set","All attributes","Given attribute set","YIELDS all attributes"],
+        correct: 2,
+        explanation: "Closure starts with the given attribute set and adds determined attributes."
+    },
+    {
+        question: "Which normal form requires no repeating groups (atomic attributes)?",
+        options: ["1NF","2NF","3NF","BCNF"],
+        correct: 0,
+        explanation: "1NF mandates atomic (indivisible) attribute values."
+    },
+    {
+        question: "Which normal form eliminates transitive dependencies?",
+        options: ["1NF","2NF","3NF","BCNF"],
+        correct: 2,
+        explanation: "3NF removes transitive dependencies unless the dependent attribute is prime."
+    },
+    {
+        question: "Which normal form requires every FD X→Y to have X as a superkey?",
+        options: ["1NF","2NF","3NF","BCNF"],
+        correct: 3,
+        explanation: "BCNF enforces that all determinant attribute sets are superkeys."
+    },
+    {
+        question: "Which normal form is considered obsolete and not covered?",
+        options: ["1NF","2NF","3NF","BCNF"],
+        correct: 1,
+        explanation: "2NF is considered obsolete and is often skipped in modern design."
+    },
+    {
+        question: "What property ensures no spurious tuples when joining decomposed relations?",
+        options: ["Dependency preservation","Lossless-join","Update anomaly","Functional dependency"],
+        correct: 1,
+        explanation: "Lossless-join property guarantees no data is lost or spurious tuples produced."
+    },
+    {
+        question: "What property ensures all original FDs can be enforced on decomposed schemas?",
+        options: ["Lossless-join","Dependency preservation","Normalization","Atomicity"],
+        correct: 1,
+        explanation: "Dependency preservation allows enforcing all FDs without recombining relations."
+    },
+    {
+        question: "In BCNF decomposition, relation R is split on FD X→A into:",
+        options: ["R1(X,A) and R2(X, R−{A})","R1(X) and R2(A)","R1(R−X) and R2(A)","R1(X,A) and R2(A)"],
+        correct: 0,
+        explanation: "BCNF algorithm splits into R1(X∪A) and R2(X∪(all other attributes))."
+    },
+    {
+        question: "HourlyEmps with FD rating→wage violates which normal form?",
+        options: ["1NF","3NF","BCNF","5NF"],
+        correct: 2,
+        explanation: "rating→wage and rating not a key violates BCNF."
+    },
+    {
+        question: "What is the primary key of the decomposed rating–wage relation?",
+        options: ["rating","wage","rating,wage","ssn"],
+        correct: 0,
+        explanation: "The rating attribute uniquely determines wage."
+    },
+    {
+        question: "After decomposition, which relation contains ssn,name,lot,hours?",
+        options: ["HourlyEmps","RatingWage","EmployeeHours","WageHours"],
+        correct: 2,
+        explanation: "EmployeeHours holds employee data and hours after separating wage."
+    },
+    {
+        question: "Which FD is implied by ssn→did and did→lot?",
+        options: ["ssn→since","did→ssn","ssn→lot","lot→did"],
+        correct: 2,
+        explanation: "By transitivity, ssn→lot."
+    },
+    {
+        question: "What does X+ represent in FD theory?",
+        options: ["X","All attributes determined by X","Empty set","All attributes of R"],
+        correct: 1,
+        explanation: "X+ is the closure: all attributes functionally determined by X."
+    },
+    {
+        question: "Which design phase covers schema refinement & normalization?",
+        options: ["Requirement analysis","Conceptual design","Logical design","Physical design"],
+        correct: 2,
+        explanation: "Logical design includes normalization and schema refinement."
+    },
+    {
+        question: "How many main design steps (S1–S6) are outlined?",
+        options: ["4","5","6","7"],
+        correct: 2,
+        explanation: "Lecture lists six phases from analysis to application design."
+    },
+    {
+        question: "What is the main goal of normalization?",
+        options: ["Maximize redundancy","Minimize redundancy and anomalies","Speed up queries","Enforce security"],
+        correct: 1,
+        explanation: "Normalization reduces redundancy and prevents anomalies."
+    },
+    {
+        question: "Which issue may still occur after BCNF decomposition?",
+        options: ["Update anomaly","Insertion anomaly","Dependency preservation issue","Deletion anomaly"],
+        correct: 2,
+        explanation: "BCNF can sacrifice dependency preservation."
+    },
+    {
+        question: "Which algorithm computes the closure of an attribute set?",
+        options: ["Normalization algorithm","Closure algorithm","BCNF algorithm","Join algorithm"],
+        correct: 1,
+        explanation: "Closure algorithm derives all attributes determined by a given set."
+    }
+];
+
+
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedAnswers = [];
+        let quizStarted = false;
+
+        function startQuiz() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('quiz-screen').style.display = 'block';
+            quizStarted = true;
+            selectedAnswers = new Array(questions.length).fill(-1);
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('question-number').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            document.getElementById('progress-text').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            document.getElementById('question-text').innerHTML = question.question;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                
+                // Check if option contains code
+                if (option.includes('SELECT') || option.includes('CREATE') || option.includes('INSERT') || option.includes('ALTER')) {
+                    optionElement.innerHTML = `<div class="option-code">${option}</div>`;
+                } else {
+                    optionElement.textContent = option;
+                }
+                
+                optionElement.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Update progress bar
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+            
+            // Update navigation buttons
+            document.getElementById('prev-btn').disabled = currentQuestion === 0;
+            document.getElementById('next-btn').disabled = true;
+            document.getElementById('next-btn').textContent = currentQuestion === questions.length - 1 ? 'Finish Quiz' : 'Next Question';
+            
+            // Hide explanation
+            document.getElementById('explanation').style.display = 'none';
+            
+            // Show previous selection if any
+            if (selectedAnswers[currentQuestion] !== -1) {
+                const options = document.querySelectorAll('.option');
+                options[selectedAnswers[currentQuestion]].classList.add('selected');
+                document.getElementById('next-btn').disabled = false;
+            }
+        }
+
+        function selectOption(index) {
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => option.classList.remove('selected'));
+            options[index].classList.add('selected');
+            
+            selectedAnswers[currentQuestion] = index;
+            document.getElementById('next-btn').disabled = false;
+            
+            // Show explanation immediately
+            showExplanation();
+        }
+
+        function showExplanation() {
+            const question = questions[currentQuestion];
+            const selectedIndex = selectedAnswers[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            
+            // Disable all options
+            options.forEach(option => option.classList.add('disabled'));
+            
+            // Show correct and incorrect answers
+            options.forEach((option, index) => {
+                if (index === question.correct) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex && index !== question.correct) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            // Show explanation
+            const explanationDiv = document.getElementById('explanation');
+            explanationDiv.innerHTML = `
+                <h4>💡 Explanation:</h4>
+                <p>${question.explanation}</p>
+            `;
+            explanationDiv.style.display = 'block';
+        }
+
+        function nextQuestion() {
+            if (selectedAnswers[currentQuestion] === questions[currentQuestion].correct) {
+                score++;
+            }
+            
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion();
+            } else {
+                showResults();
+            }
+            
+            updateScore();
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion();
+            }
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+        }
+
+        function showResults() {
+            document.getElementById('quiz-screen').style.display = 'none';
+            document.getElementById('results-screen').style.display = 'block';
+            
+            const percentage = Math.round((score / questions.length) * 100);
+            const finalScoreElement = document.getElementById('final-score');
+            finalScoreElement.textContent = `${score}/${questions.length} (${percentage}%)`;
+            
+            // Color code the score
+            if (percentage >= 90) {
+                finalScoreElement.className = 'score excellent';
+            } else if (percentage >= 75) {
+                finalScoreElement.className = 'score good';
+            } else if (percentage >= 60) {
+                finalScoreElement.className = 'score average';
+            } else {
+                finalScoreElement.className = 'score poor';
+            }
+            
+            // Performance message
+            let message = '';
+            if (percentage >= 90) {
+                message = '🎉 Outstanding! You have excellent command of SQL fundamentals!';
+            } else if (percentage >= 75) {
+                message = '👍 Great job! You have a solid understanding';
+            }
+        }
+	</script>
+</body>
+</html>
