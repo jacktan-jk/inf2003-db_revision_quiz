@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INF2003 Database Systems Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .quiz-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quiz-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateY(-2px);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #e6f2ff;
+        }
+
+        .option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .option.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .score-display {
+            text-align: center;
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .results {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .results h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .score {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .score.excellent { color: #28a745; }
+        .score.good { color: #17a2b8; }
+        .score.average { color: #ffc107; }
+        .score.poor { color: #dc3545; }
+
+        .explanation {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 0 8px 8px 0;
+            text-align: left;
+        }
+
+        .explanation h4 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .start-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .start-screen h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .start-screen p {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .quiz-info {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .quiz-info h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .quiz-info ul {
+            color: #555;
+            line-height: 1.8;
+        }
+
+        @media (max-width: 768px) {
+            .quiz-container {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .question-text {
+                font-size: 1.1em;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="header">
+            <h1>INF2003 Database Systems</h1>
+            <p>DBMS Overview Quiz - AY24/25 T3</p>
+        </div>
+
+        <div id="start-screen" class="start-screen">
+            <h2>Welcome to the Database Systems Quiz!</h2>
+            <p>Test your knowledge on DBMS concepts, relational data models, and database design principles.</p>
+            
+            <div class="quiz-info">
+                <h3>Quiz Information:</h3>
+                <ul>
+                    <li>📊 <strong>25 Questions</strong> covering all major topics</li>
+                    <li>🎯 <strong>Multiple Choice</strong> format</li>
+                    <li>⏱️ <strong>No time limit</strong> - take your time to think</li>
+                    <li>📝 <strong>Detailed explanations</strong> provided after each question</li>
+                    <li>🏆 <strong>Score tracking</strong> with performance feedback</li>
+                </ul>
+            </div>
+            
+            <button class="btn btn-primary" onclick="startQuiz()">Start Quiz</button>
+        </div>
+
+        <div id="quiz-screen" style="display: none;">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            
+            <div class="score-display">
+                <span>Score: <span id="score">0</span> / <span id="total">25</span></span>
+            </div>
+
+            <div class="question-container">
+                <div class="question-number" id="question-number">Question 1 of 25</div>
+                <div class="question-text" id="question-text"></div>
+                <div class="options" id="options"></div>
+                <div class="explanation" id="explanation" style="display: none;"></div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-secondary" id="prev-btn" onclick="prevQuestion()" disabled>Previous</button>
+                <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()" disabled>Next Question</button>
+            </div>
+        </div>
+
+        <div id="results-screen" style="display: none;">
+            <div class="results">
+                <h2>Quiz Complete!</h2>
+                <div class="score" id="final-score">0/25</div>
+                <p id="performance-message"></p>
+                <button class="btn btn-primary" onclick="restartQuiz()">Restart Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "What is the main difference between a generic database and a Database Management System (DBMS)?",
+                options: [
+                    "DBMS is smaller in size",
+                    "DBMS follows standardized protocols and provides systematic management",
+                    "Generic databases are more secure",
+                    "DBMS only works with text files"
+                ],
+                correct: 1,
+                explanation: "DBMS follows standardized protocols and provides systematic management features like data independence, security, and concurrent access, while generic databases are just organized collections of information without these systematic features."
+            },
+            {
+                question: "Which of the following is NOT mentioned as an advantage of DBMS?",
+                options: [
+                    "Data independence",
+                    "Efficient data access",
+                    "Reduced application development time",
+                    "Automatic data backup"
+                ],
+                correct: 3,
+                explanation: "The lecture mentions data independence, efficient data access, data integrity and security, data administration, concurrent access and crash recovery, and reduced application development time as advantages of DBMS."
+            },
+            {
+                question: "What is the first stage in database design?",
+                options: [
+                    "Conceptual Database Design",
+                    "Logical Database Design",
+                    "Requirement Analysis",
+                    "Physical Database Design"
+                ],
+                correct: 2,
+                explanation: "Requirement Analysis is Stage 1 of database design, where developers work with clients to understand what data needs to be stored and what applications will use the data."
+            },
+            {
+                question: "In the database design stages, what is the purpose of Stage 2: Conceptual Database Design?",
+                options: [
+                    "To determine the DBMS to implement",
+                    "To create a high-level description of data using tools like ER diagrams",
+                    "To build indexes on tables",
+                    "To enforce access rules"
+                ],
+                correct: 1,
+                explanation: "Stage 2 (Conceptual Database Design) involves creating a high-level description of the data using tools like Entity Relationship (ER) diagrams to model requirements before creating actual tables."
+            },
+            {
+                question: "What does normalization aim to achieve in database design?",
+                options: [
+                    "Increase data redundancy",
+                    "Reduce data redundancy and improve data integrity",
+                    "Make queries slower",
+                    "Increase storage space"
+                ],
+                correct: 1,
+                explanation: "Normalization is the process to reduce data redundancy and improve data integrity, which occurs during Stage 4: Schema Refinement."
+            },
+            {
+                question: "Who is credited with developing the relational data model in the 1970s?",
+                options: [
+                    "Charles W. Bachman",
+                    "IBM",
+                    "Edgar F. ('Ted') Codd",
+                    "Michael Stonebraker"
+                ],
+                correct: 2,
+                explanation: "Edgar F. ('Ted') Codd developed the relational data model in the 1970s, which became the foundation for modern relational databases."
+            },
+            {
+                question: "In relational database terminology, what is a 'tuple'?",
+                options: [
+                    "A column",
+                    "A table",
+                    "A row or record",
+                    "A database"
+                ],
+                correct: 2,
+                explanation: "In relational database terminology, a tuple refers to a row or record in a table."
+            },
+            {
+                question: "What is a relation schema?",
+                options: [
+                    "The data stored in a table",
+                    "The structure specifying attribute names and types",
+                    "A type of database",
+                    "A query language"
+                ],
+                correct: 1,
+                explanation: "A relation schema specifies the structure of a relation, including the attribute names and their domains (types)."
+            },
+            {
+                question: "What does NULL represent in a database?",
+                options: [
+                    "The number zero",
+                    "An empty string",
+                    "Unknown or unspecified value",
+                    "A default value"
+                ],
+                correct: 2,
+                explanation: "NULL indicates an unknown or unspecified value, not zero. Operations with NULLs can be troublesome, so it's recommended to avoid using NULL when possible."
+            },
+            {
+                question: "What is the key characteristic that distinguishes a primary key from a super-key?",
+                options: [
+                    "Primary key is larger",
+                    "Primary key is chosen by the DB admin from candidate keys",
+                    "Primary key allows duplicates",
+                    "Primary key is not unique"
+                ],
+                correct: 1,
+                explanation: "A primary key is one of the candidate keys chosen by the database administrator. Every key is a super-key, but a primary key is specifically selected from the available candidate keys."
+            },
+            {
+                question: "In the Students table example, which attributes are mentioned as candidate keys?",
+                options: [
+                    "Only SID",
+                    "Only NRIC",
+                    "SID and NRIC",
+                    "Name and DOB"
+                ],
+                correct: 2,
+                explanation: "Both SID and NRIC are mentioned as candidate keys for the Students table, as both can uniquely identify a student."
+            },
+            {
+                question: "What is a foreign key?",
+                options: [
+                    "A key from another country",
+                    "A primary key of the same relation",
+                    "A set of fields used to refer to a tuple in another relation",
+                    "An encrypted key"
+                ],
+                correct: 2,
+                explanation: "A foreign key is a set of fields in one relation used to refer to a tuple in another relation. It must correspond to the primary key of the referenced relation."
+            },
+            {
+                question: "Which of the following is true about tuples in a relation?",
+                options: [
+                    "All tuples must be identical",
+                    "Tuples cannot have the same values for any attributes",
+                    "No two tuples can be identical in all attributes",
+                    "Order of tuples matters"
+                ],
+                correct: 2,
+                explanation: "Tuples cannot be identical in all attributes (no duplicates allowed), though they may share the same values for some attributes. The order of tuples is not significant."
+            },
+            {
+                question: "What is the minimal requirement for a set of attributes to be considered a key?",
+                options: [
+                    "It must be the largest possible set",
+                    "It must uniquely identify tuples and be minimal",
+                    "It must include all attributes",
+                    "It must be numeric"
+                ],
+                correct: 1,
+                explanation: "A key must uniquely identify tuples (no two distinct tuples can have the same values for all key attributes) and be minimal (no smaller subset can serve as a key)."
+            },
+            {
+                question: "In the Enrolled table example, what does SID represent?",
+                options: [
+                    "A primary key of the Enrolled table",
+                    "A foreign key referring to the Students table",
+                    "A unique identifier for courses",
+                    "A student's grade"
+                ],
+                correct: 1,
+                explanation: "In the Enrolled table, SID is a foreign key that refers to the Students table, linking enrollment records to specific students."
+            },
+            {
+                question: "What are the main components of data models mentioned in the lecture?",
+                options: [
+                    "Data, Relationships, Constraints",
+                    "Tables, Rows, Columns",
+                    "Users, Applications, Security",
+                    "Storage, Processing, Output"
+                ],
+                correct: 0,
+                explanation: "The main components of data models are: Data (what needs to be stored), Relationships (how data is related), and Constraints (rules like uniqueness)."
+            },
+            {
+                question: "What is the purpose of an Entity Relationship (ER) diagram?",
+                options: [
+                    "To store actual data",
+                    "To provide a high-level, abstract design tool for modeling requirements",
+                    "To execute queries",
+                    "To enforce security"
+                ],
+                correct: 1,
+                explanation: "ER diagrams are high-level, abstract design tools used to model requirements before creating actual tables. They help in conceptual database design and can be easily translated to relational models."
+            },
+            {
+                question: "According to the lecture, what happens during Stage 5: Physical Database Design?",
+                options: [
+                    "Create ER diagrams",
+                    "Analyze user requirements",
+                    "Build indexes and cluster tables for performance",
+                    "Design user interfaces"
+                ],
+                correct: 2,
+                explanation: "Stage 5 (Physical Database Design) involves considering typical workloads and refining the database design for performance, including building indexes on tables and clustering some tables."
+            },
+            {
+                question: "What is the relationship between the referencing and referenced relations in foreign keys?",
+                options: [
+                    "They must be the same table",
+                    "The foreign key must correspond to the primary key of the referenced relation",
+                    "They cannot be related",
+                    "The referenced relation must be smaller"
+                ],
+                correct: 1,
+                explanation: "The foreign key in the referencing relation must correspond to the primary key of the referenced relation, acting like a logical pointer between the two relations."
+            },
+            {
+                question: "Why might duplicate tuples be allowed 'for a while' in practice, even though they're not allowed in theory?",
+                options: [
+                    "To improve performance during data loading or processing",
+                    "To save storage space",
+                    "To make queries faster",
+                    "To reduce complexity"
+                ],
+                correct: 0,
+                explanation: "While duplicate tuples are not allowed in theory, they might be temporarily allowed in practice during data loading or processing operations for performance reasons, before being cleaned up."
+            },
+            {
+                question: "What is the notation used to represent a relation schema?",
+                options: [
+                    "r(R) where r is the relation and R is the schema",
+                    "R(r) where R is the relation and r is the schema",
+                    "r + R where r and R are combined",
+                    "r = R where r equals R"
+                ],
+                correct: 0,
+                explanation: "The notation r(R) is used where r represents the relation name and R represents the schema (set of attributes)."
+            },
+            {
+                question: "In the Students table example, what would be the result of R ∩ S if R = (sid, name, DOB) and S = (sid, DOB)?",
+                options: [
+                    "(name)",
+                    "(sid, DOB)",
+                    "(sid, name, DOB)",
+                    "(sid)"
+                ],
+                correct: 1,
+                explanation: "R ∩ S represents the intersection - attributes found in both R and S. Both R and S contain 'sid' and 'DOB', so the result is (sid, DOB)."
+            },
+            {
+                question: "What was the significance of Michael Stonebraker's Turing Award in 2015?",
+                options: [
+                    "Developing the first computer",
+                    "Creating the internet",
+                    "Fundamental contributions to modern database systems",
+                    "Inventing programming languages"
+                ],
+                correct: 2,
+                explanation: "Michael Stonebraker received the Turing Award in 2015 for his fundamental contributions to the concepts and practices underlying modern database systems."
+            },
+            {
+                question: "According to the lecture, what is the recommended approach when a value is not available instead of using NULL?",
+                options: [
+                    "Leave the field empty",
+                    "Use zero",
+                    "Specify default values",
+                    "Use negative numbers"
+                ],
+                correct: 2,
+                explanation: "The lecture recommends specifying default values instead of using NULL when possible, as operations with NULLs can be troublesome."
+            },
+            {
+                question: "What does the set {SID, GPA} represent in the context of keys?",
+                options: [
+                    "A candidate key",
+                    "A primary key",
+                    "A super-key",
+                    "A foreign key"
+                ],
+                correct: 2,
+                explanation: "The set {SID, GPA} is a super-key because it contains SID (which is already a key) plus an additional attribute. Adding any attribute to a key creates a super-key."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedAnswers = [];
+        let quizStarted = false;
+
+        function startQuiz() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('quiz-screen').style.display = 'block';
+            quizStarted = true;
+            selectedAnswers = new Array(questions.length).fill(-1);
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('question-number').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            document.getElementById('question-text').textContent = question.question;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Update progress bar
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+            
+            // Update navigation buttons
+            document.getElementById('prev-btn').disabled = currentQuestion === 0;
+            document.getElementById('next-btn').disabled = true;
+            document.getElementById('next-btn').textContent = currentQuestion === questions.length - 1 ? 'Finish Quiz' : 'Next Question';
+            
+            // Hide explanation
+            document.getElementById('explanation').style.display = 'none';
+            
+            // Show previous selection if any
+            if (selectedAnswers[currentQuestion] !== -1) {
+                const options = document.querySelectorAll('.option');
+                options[selectedAnswers[currentQuestion]].classList.add('selected');
+                document.getElementById('next-btn').disabled = false;
+            }
+        }
+
+        function selectOption(index) {
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => option.classList.remove('selected'));
+            options[index].classList.add('selected');
+            
+            selectedAnswers[currentQuestion] = index;
+            document.getElementById('next-btn').disabled = false;
+            
+            // Show explanation immediately
+            showExplanation();
+        }
+
+        function showExplanation() {
+            const question = questions[currentQuestion];
+            const selectedIndex = selectedAnswers[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            
+            // Disable all options
+            options.forEach(option => option.classList.add('disabled'));
+            
+            // Show correct and incorrect answers
+            options.forEach((option, index) => {
+                if (index === question.correct) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex && index !== question.correct) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            // Show explanation
+            const explanationDiv = document.getElementById('explanation');
+            explanationDiv.innerHTML = `
+                <h4>Explanation:</h4>
+                <p>${question.explanation}</p>
+            `;
+            explanationDiv.style.display = 'block';
+        }
+
+        function nextQuestion() {
+            if (selectedAnswers[currentQuestion] === questions[currentQuestion].correct) {
+                score++;
+            }
+            
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion();
+            } else {
+                showResults();
+            }
+            
+            updateScore();
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion();
+            }
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+        }
+
+        function showResults() {
+            document.getElementById('quiz-screen').style.display = 'none';
+            document.getElementById('results-screen').style.display = 'block';
+            
+            const percentage = Math.round((score / questions.length) * 100);
+            const finalScoreElement = document.getElementById('final-score');
+            finalScoreElement.textContent = `${score}/${questions.length} (${percentage}%)`;
+            
+            // Color code the score
+            if (percentage >= 90) {
+                finalScoreElement.className = 'score excellent';
+            } else if (percentage >= 80) {
+                finalScoreElement.className = 'score good';
+            } else if (percentage >= 70) {
+                finalScoreElement.className = 'score average';
+            } else {
+                finalScoreElement.className = 'score poor';
+            }
+            
+            // Performance message
+            let message = '';
+            if (percentage >= 90) {
+                message = 'Excellent! You have mastered the DBMS concepts!';
+            } else if (percentage >= 80) {
+                message = 'Good job! You have a solid understanding of database systems.';
+            } else if (percentage >= 70) {
+                message = 'Not bad! Review the concepts and try again for better results.';
+            } else {
+                message = 'Keep studying! Focus on the fundamental concepts and try again.';
+            }
+            
+            document.getElementById('performance-message').textContent = message;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            selectedAnswers = [];
+            quizStarted = false;
+            
+            document.getElementById('results-screen').style.display = 'none';
+            document.getElementById('start-screen').style.display = 'block';
+            document.getElementById('score').textContent = '0';
+            document.getElementById('progress').style.width = '0%';
+        }
+
+        // Initialize the quiz
+        updateScore();
+    </script>
+</body>
+</html>
