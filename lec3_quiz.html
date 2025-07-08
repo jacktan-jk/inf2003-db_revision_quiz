@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INF2003 Database Systems - Lecture 3 Quiz</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .quiz-container { background: white; border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.15); max-width: 900px; width: 100%; padding: 40px; position: relative; overflow: hidden; }
+        .quiz-container::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #1e3c72, #2a5298); }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: #333; font-size: 2.5em; margin-bottom: 10px; background: linear-gradient(135deg, #1e3c72, #2a5298); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .header p { color: #666; font-size: 1.1em; font-weight: 500; }
+        .start-screen, #quiz-screen, #results-screen { width: 100%; }
+        .start-screen h2, .results h2 { color: #333; font-size: 2.2em; margin-bottom: 20px; }
+        .start-screen p, .performance-message { color: #666; font-size: 1.2em; line-height: 1.6; margin-bottom: 20px; }
+        .quiz-info { background: #f8f9fa; border-radius: 15px; padding: 25px; margin-bottom: 30px; }
+        .quiz-info h3 { color: #1e3c72; margin-bottom: 15px; font-size: 1.3em; }
+        .quiz-info ul { color: #555; line-height: 1.8; font-size: 1.1em; list-style: inside; }
+        .btn { padding: 15px 35px; border: none; border-radius: 30px; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: all .3s ease; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-primary { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(30,60,114,0.4); }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #5a6268; transform: translateY(-2px); }
+        .btn:disabled { opacity: .6; cursor: not-allowed; }
+        .progress-container { margin-bottom: 25px; }
+        .progress-bar { width: 100%; height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden; margin-bottom: 10px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #1e3c72, #2a5298); transition: width .3s ease; border-radius:5px; }
+        .progress-text, .score-display { text-align: center; color: #666; font-weight: 500; margin-bottom: 20px; }
+        .question-container { margin-bottom: 30px; }
+        .question-number { color: #1e3c72; font-weight: bold; font-size:1.2em; margin-bottom:10px; }
+        .question-text { font-size:1.4em; color:#333; margin-bottom:20px; line-height:1.6; }
+        .options { display:flex; flex-direction:column; gap:15px; }
+        .option { background:#f8f9fa; border:2px solid #e9ecef; border-radius:12px; padding:15px 20px; cursor:pointer; transition:all .3s ease; position:relative; font-size:1.1em; }
+        .option:hover { border-color:#1e3c72; background:#e6f3ff; transform:translateY(-2px); }
+        .option.selected { border-color:#1e3c72; background:#e6f3ff; }
+        .option.correct { border-color:#28a745; background:#d4edda; color:#155724; }
+        .option.incorrect { border-color:#dc3545; background:#f8d7da; color:#721c24; }
+        .option.disabled { cursor:not-allowed; opacity:.7; }
+        .controls { display:flex; justify-content:space-between; align-items:center; }
+        .start-screen, #results-screen { text-align:center; }
+        .results .score { font-size:3.5em; font-weight:bold; margin:20px 0; }
+        .score.excellent { color:#28a745; }
+        .score.good { color:#17a2b8; }
+        .score.average { color:#ffc107; }
+        .score.poor { color:#dc3545; }
+        .explanation { background:#e3f2fd; border-left:4px solid #2196f3; padding:20px; margin-top:20px; border-radius:0 8px 8px 0; }
+        .explanation h4 { color:#1976d2; margin-bottom:10px; font-size:1.2em; }
+        .explanation p { color:#555; line-height:1.6; }
+        @media (max-width:768px) { .controls { flex-direction:column; gap:15px; } .btn { width:100%; } }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="header">
+            <h1>Lecture 3 Quiz</h1>
+            <p>Lecture 3: SQL (Part 2) - AY24/25 T3</p>
+        </div>
+        <div id="start-screen" class="start-screen">
+            <h2>Test Your SQL Skills: Part 2</h2>
+            <p>Covering set operations, aggregation, grouping, subqueries, constraints, views, ordering, and best practices.</p>
+            <div class="quiz-info">
+                <h3>📚 Quiz Coverage:</h3>
+                <ul>
+                    <li>🔀 UNION, INTERSECT, EXCEPT</li>
+                    <li>📊 Aggregate Functions (COUNT, SUM, AVG, MAX, MIN)</li>
+                    <li>👥 GROUP BY & HAVING</li>
+                    <li>📑 Nested Queries & Subqueries</li>
+                    <li>🔢 ANY, ALL, IN Operators</li>
+                    <li>✅ CHECK Constraints & Domains</li>
+                    <li>👁️ Views</li>
+                    <li>🔃 ORDER BY</li>
+                    <li>💡 SQL Good Practices</li>
+                </ul>
+            </div>
+            <div class="quiz-info">
+                <h3>🎯 Quiz Details:</h3>
+                <ul>
+                    <li>📄 <strong>20 Questions</strong> covering all lecture topics</li>
+                    <li>✅ <strong>Multiple Choice</strong> with SQL code snippets</li>
+                    <li>⏱️ <strong>Self-paced</strong> - no time limit</li>
+                    <li>📝 <strong>Instant feedback</strong> and explanations</li>
+                    <li>🏆 <strong>Final score</strong> at end</li>
+                </ul>
+            </div>
+            <button class="btn btn-primary" onclick="startQuiz()">Start Quiz</button>
+        </div>
+        <div id="quiz-screen" style="display:none;">
+            <div class="progress-container">
+                <div class="progress-bar"><div id="progress" class="progress-fill"></div></div>
+                <div class="progress-text" id="progress-text">Question 1 of 20</div>
+            </div>
+            <div class="score-display">Score: <span id="score">0</span> / <span id="total">20</span></div>
+            <div class="question-container">
+                <div class="question-number" id="question-number">Question 1 of 20</div>
+                <div class="question-text" id="question-text"></div>
+                <div class="options" id="options"></div>
+                <div id="explanation" class="explanation" style="display:none;"></div>
+            </div>
+            <div class="controls">
+                <button id="prev-btn" class="btn btn-secondary" onclick="prevQuestion()" disabled>Previous</button>
+                <button id="next-btn" class="btn btn-primary" onclick="nextQuestion()" disabled>Next</button>
+            </div>
+        </div>
+        <div id="results-screen" style="display:none;">
+            <h2>Quiz Complete!</h2>
+            <div class="score" id="final-score">0/20</div>
+            <div class="performance-message" id="performance-message"></div>
+            <button class="btn btn-primary" onclick="restartQuiz()">Restart</button>
+        </div>
+    </div>
+    <script>
+        const questions = [
+            { question: "Which SQL operation returns all rows from both queries, removing duplicates?", options: ["UNION", "UNION ALL", "INTERSECT", "EXCEPT"], correct: 0, explanation: "UNION merges results and removes duplicates by default; UNION ALL retains duplicates." },
+            { question: "What does INTERSECT do?", options: ["Returns rows in first query not in second", "Returns common rows in both queries", "Merges and removes duplicates", "Returns all rows"], correct: 1, explanation: "INTERSECT returns only rows present in both result sets." },
+            { question: "Which operator finds rows in first set but not in second?", options: ["UNION", "EXCEPT", "INTERSECT", "JOIN"], correct: 1, explanation: "EXCEPT returns rows from the first query that are absent in the second." },
+            { question: "To include duplicate rows in a UNION, you should use: ", options: ["UNION ALL", "UNION DISTINCT", "INTERSECT ALL", "EXCEPT ALL"], correct: 0, explanation: "UNION ALL retains duplicates; default UNION removes them." },
+            { question: "Which aggregate returns the total number of rows?", options: ["SUM(*)", "COUNT(*)", "AVG(*)", "MAX(*)"], correct: 1, explanation: "COUNT(*) returns the number of rows in the result." },
+            { question: "How do you compute the average age of all sailors?", options: ["SELECT SUM(age) FROM Sailors;", "SELECT AVG(age) FROM Sailors;", "SELECT COUNT(age)/COUNT(*) FROM Sailors;", "SELECT MIN(age) FROM Sailors;"], correct: 1, explanation: "AVG(age) computes the average of the age column." },
+            { question: "Which query finds the oldest sailor's name and age?", options: ["SELECT name, MAX(age) FROM Sailors;","SELECT MAX(name), age FROM Sailors;","SELECT name FROM Sailors WHERE age=MAX(age);","SELECT * FROM Sailors ORDER BY age DESC LIMIT 1;"], correct: 0, explanation: "Using MAX(age) with name returns the maximum age and its name." },
+            { question: "What clause groups rows by one or more columns?", options: ["WHERE","GROUP BY","ORDER BY","HAVING"], correct: 1, explanation: "GROUP BY groups result rows by specified columns for aggregation." },
+            { question: "Which clause filters groups after aggregation?", options: ["WHERE","GROUP BY","ORDER BY","HAVING"], correct: 3, explanation: "HAVING applies conditions on grouped results; WHERE filters before grouping." },
+            { question: "To find rating levels with more than one sailor older than 18, you use: ", options: ["WHERE age>18 GROUP BY rating","GROUP BY rating HAVING COUNT(*)>1","WHERE age>18 HAVING COUNT(*)>1","GROUP BY rating WHERE COUNT(*)>1"], correct: 1, explanation: "Use GROUP BY rating HAVING COUNT(*)>1 after filtering age>=18 in WHERE." },
+            { question: "Which keyword tests membership in a set returned by a subquery?", options: ["ANY","ALL","IN","EXISTS"], correct: 2, explanation: "IN checks if a value matches any value in the subquery result set." },
+            { question: "What does rating > ALL (subquery) do?", options: ["True if rating > any row","True if rating > every row","Same as rating > ALL","Errors out"], correct: 1, explanation: "ALL requires the comparison to be true for every value in the subquery." },
+            { question: "Which constraint ensures rating between 1 and 10?", options: ["CHECK(rating>=1 AND rating<=10)","NOT NULL(rating)","UNIQUE(rating)","DEFAULT rating=5"], correct: 0, explanation: "CHECK enforces the specified condition on the rating column." },
+            { question: "How do you define a domain rtval for rating with default 1?", options: ["CREATE DOMAIN rtval AS INTEGER;","CREATE DOMAIN rtval INTEGER DEFAULT 1 CHECK(VALUE BETWEEN 1 AND 10);","CREATE DOMAIN rtval AS INTEGER DEFAULT 1;","ALTER TYPE rtval ADD CHECK"], correct: 1, explanation: "CREATE DOMAIN rtval INTEGER DEFAULT 1 CHECK(VALUE>=1 AND VALUE<=10) defines domain with constraint." },
+            { question: "What is a view?", options: ["A physical table","A virtual table defined by a query","An index","A stored procedure"], correct: 1, explanation: "A view is a virtual table based on a query definition." },
+            { question: "Which statement creates a view seniorSailors?", options: ["CREATE VIEW seniorSailors AS SELECT * FROM Sailors WHERE age>40;","CREATE VIEW seniorSailors(age,name) ...","CREATE TABLE seniorSailors AS SELECT ...","VIEW seniorSailors AS SELECT ..."], correct: 0, explanation: "CREATE VIEW name AS SELECT ... defines a view." },
+            { question: "Which clause orders result rows?", options: ["WHERE","GROUP BY","ORDER BY","HAVING"], correct: 2, explanation: "ORDER BY sorts the final result set by specified columns." },
+            { question: "What is the default sort order?", options: ["DESC","ASC","RANDOM","NONE"], correct: 1, explanation: "ORDER BY defaults to ascending (ASC) if not specified." },
+            { question: "Which practice improves readability of SQL code?", options: ["Use lowercase for keywords","Avoid comments","Use consistent indentation","Write long lines"], correct: 2, explanation: "Consistent indentation and formatting greatly improve code readability." },
+            { question: "Why use uppercase for SQL keywords?", options: ["It’s mandatory","Improves clarity and distinguishes keywords","Faster execution","Enables keywords as identifiers"], correct: 1, explanation: "Uppercase for keywords is a convention that improves clarity." }
+        ];
+        let currentQuestion = 0, score = 0, selectedAnswers = [];
+        function startQuiz() {
+            document.getElementById('start-screen').style.display='none';
+            document.getElementById('quiz-screen').style.display='block';
+            selectedAnswers = Array(questions.length).fill(-1);
+            showQuestion();
+        }
+        function showQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById('question-number').textContent = `Question ${currentQuestion+1} of ${questions.length}`;
+            document.getElementById('progress-text').textContent = `Question ${currentQuestion+1} of ${questions.length}`;
+            document.getElementById('question-text').textContent = q.question;
+            const opts = document.getElementById('options'); opts.innerHTML='';
+            q.options.forEach((opt,i)=>{
+                const d=document.createElement('div'); d.className='option'; d.textContent=opt;
+                d.onclick = ()=>selectOption(i);
+                opts.appendChild(d);
+            });
+            document.getElementById('prev-btn').disabled=currentQuestion===0;
+            document.getElementById('next-btn').disabled=true;
+            document.getElementById('explanation').style.display='none';
+            document.getElementById('score').textContent=score;
+            const fill = ((currentQuestion+1)/questions.length)*100;
+            document.getElementById('progress').style.width=fill+'%';
+        }
+        function selectOption(i) {
+            selectedAnswers[currentQuestion]=i;
+            const opts=document.querySelectorAll('.option'); opts.forEach((o,idx)=>{
+                o.classList.remove('selected','correct','incorrect'); o.classList.add('disabled');
+                if(idx===i) o.classList.add('selected');
+                if(idx===questions[currentQuestion].correct) o.classList.add('correct');
+                else if(idx===i) o.classList.add('incorrect');
+            });
+            const exp=document.getElementById('explanation'); exp.innerHTML=`<h4>Explanation:</h4><p>${questions[currentQuestion].explanation}</p>`; exp.style.display='block';
+            document.getElementById('next-btn').disabled=false;
+        }
+        function nextQuestion() {
+            if(selectedAnswers[currentQuestion]===questions[currentQuestion].correct) score++;
+            if(currentQuestion<questions.length-1) { currentQuestion++; showQuestion(); }
+            else showResults();
+        }
+        function prevQuestion() {
+            if(currentQuestion>0) { currentQuestion--; showQuestion(); }
+        }
+        function showResults() {
+            document.getElementById('quiz-screen').style.display='none';
+            document.getElementById('results-screen').style.display='block';
+            const pct=Math.round((score/questions.length)*100);
+            const fs=document.getElementById('final-score'); fs.textContent=`${score}/${questions.length} (${pct}%)`;
+            if(pct>=90) fs.className='score excellent';
+            else if(pct>=75) fs.className='score good';
+            else if(pct>=60) fs.className='score average'; else fs.className='score poor';
+            const msg=document.getElementById('performance-message');
+            msg.textContent = pct>=75? 'Strong grasp of SQL Part 2.' : pct>=60? 'Adequate, review weak areas.' : 'Needs further revision.';
+        }
+        function restartQuiz() { score=0; currentQuestion=0; document.getElementById('results-screen').style.display='none'; startQuiz(); }
+    </script>
+</body>
+</html>
+
